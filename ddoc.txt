@@ -1,0 +1,26 @@
+Racquetball
+
+States:
+
+	Title
+	Court
+	Message
+
+Objects:
+	Ball
+	Racquet
+
+Data:
+	Score
+
+
+State Rules:
+	Title -> "Play" -> Court
+	Title -> "Quit" -> onStop
+
+	Court -> (ball > height) -> Message "You Lose"
+	Court -> (score >= 15) -> Message "You Win"
+
+	Message -> (score >= 15) -> Title
+	Message -> (score < 15) -> score = 0, Court
+
