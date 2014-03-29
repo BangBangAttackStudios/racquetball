@@ -20,4 +20,7 @@ public class MainActivity extends Activity {
         return true;
     }
     
+    class GameGLSurfaceView extends GLSurfaceView {
+    	
+    }
 }
