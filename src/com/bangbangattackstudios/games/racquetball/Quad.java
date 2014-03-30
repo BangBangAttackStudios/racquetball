@@ -5,8 +5,7 @@ import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
 import java.nio.ShortBuffer;
 
-import javax.microedition.khronos.opengles.GL10;
-
+import android.opengl.GLES20;
 import android.util.Log;
 
 class Quad {
@@ -18,11 +17,15 @@ class Quad {
 	private ShortBuffer iBuffer;
 	private int textureHandle;
 	
+	private BasicTextureShader shader;
+	
 	public Quad(int width, int height, int textureHandle) {
 		this(width, height, textureHandle, 1, 1);
 	}
 	public Quad(int width, int height, int textureHandle, int columns, int rows) {
 		this.textureHandle = textureHandle;
+		
+		shader = new BasicTextureShader();
 		
 		vertices = new float[12];
 		uvs = new float[8];
@@ -82,18 +85,20 @@ class Quad {
 		Log.e("TEXTURELOAD", "Creating quad " + width + "x" + height + "  handle#" + textureHandle);
 	}
 	
-	public void render(GL10 gl) {
-		gl.glEnableClientState(GL10.GL_VERTEX_ARRAY);
-		gl.glEnableClientState(GL10.GL_TEXTURE_COORD_ARRAY);
+	public void render(float[] mvpMatrix) {
 		
-		gl.glBindTexture(GL10.GL_TEXTURE_2D, textureHandle);
-		gl.glVertexPointer(3, GL10.GL_FLOAT, 0, vBuffer);
-		gl.glTexCoordPointer(2, GL10.GL_FLOAT, 0, uvBuffer);
+		shader.use();
+		shader.setTextureUniform(textureHandle);
+		shader.setPositionVertexAttribArray(vBuffer, 3, 0, 0);
+		shader.setUVVertexAttribArray(uvBuffer, 2, 0, 0);
+		shader.setModelViewProjectionMatrix(mvpMatrix, false);
 		
-		gl.glDrawElements(GL10.GL_TRIANGLES, indices.length, GL10.GL_UNSIGNED_SHORT, iBuffer);
+		GLES20.glBlendFunc(GLES20.GL_SRC_ALPHA, GLES20.GL_ONE_MINUS_SRC_ALPHA);
+		GLES20.glEnable(GLES20.GL_BLEND);
+		GLES20.glDrawElements(GLES20.GL_TRIANGLES, indices.length, GLES20.GL_UNSIGNED_SHORT, iBuffer);
+		GLES20.glBlendFunc(GLES20.GL_SRC_COLOR, GLES20.GL_ONE);
+		GLES20.glDisable(GLES20.GL_BLEND);
 		
-		gl.glDisableClientState(GL10.GL_VERTEX_ARRAY);
-		gl.glDisableClientState(GL10.GL_TEXTURE_COORD_ARRAY);
-		
+		shader.finish();
 	}
 }
